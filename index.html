@@ -3,11 +3,15 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta property="og:title" content="XXX My Cool Title" />
+		<meta property="og:description" content="XXX My Cool Subtitle" />
+		<meta name="author" content="David Fetter">
 
-		<title>reveal.js</title>
+
+		<title>XXX My Cool Title</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/solarized.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -24,8 +28,19 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h3>XXX My Cool Title</h3>
+					<h5>XXX My Cool Subtitle</h5>
+				</section>
+				<section>
+					<h3>David Fetter</h3>
+					<h5>PostgreSQL Contributor</h5>
+					<p style="text-align:left">
+						<a href="mailto:david@fetter.org">david@fetter.org</a><br/>
+						Github: <a href="https://github.com/davidfetter">https://github.com/davidfetter</a><br/>
+						Blog: <a href="https://databasedoings.blogspot.com/">https://databasedoings.blogspot.com</a>
+					</p>
+				</section>
 			</div>
 		</div>
 
@@ -44,6 +59,42 @@
 					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
 				]
 			});
+		</script>
+		<style type="text/css">
+			/* 1. Style header/footer <div> so they are positioned as desired. */
+			#footer-left {
+				position: absolute;
+				bottom: 5%;
+				left: 5%;
+				font-size: 30%;
+			}
+		</style>
+
+		<!-- 2. Create hidden header/footer <div> -->
+		<div id="hidden" style="display:none;">
+			<div id="header">
+				<div id="header-left"></div>
+				<div id="header-right"></div>
+				<div id="footer-left">
+					David Fetter<br/>
+					XXX Event Title<br/>
+					XXX February 31, 2018<br/>
+					<a href=mailto:david@fetter.org>david@fetter.org</a></div>
+			</div>
+		</div>
+
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+		<script type="text/javascript">
+			// 3. On Reveal.js ready event, copy header/footer <div> into each `.slide-background` <div>
+			var header = $('#header').html();
+			if ( window.location.search.match( /print-pdf/gi ) ) {
+				Reveal.addEventListener( 'ready', function( event ) {
+					$('.slide-background').append(header);
+				});
+			}
+			else {
+				$('div.reveal').append(header);
+		   }
 		</script>
 	</body>
 </html>
