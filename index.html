@@ -3,12 +3,12 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-		<meta property="og:title" content="XXX My Cool Title" />
-		<meta property="og:description" content="XXX My Cool Subtitle" />
+		<meta property="og:title" content="Transition Tables" />
+		<meta property="og:description" content="Past, Present, and Future" />
 		<meta name="author" content="David Fetter">
 
 
-		<title>XXX My Cool Title</title>
+		<title>Transition Tables</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/solarized.css">
@@ -29,8 +29,8 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<h3>XXX My Cool Title</h3>
-					<h5>XXX My Cool Subtitle</h5>
+					<h3>Transition Tables</h3>
+					<h5>Past, Present, and Future</h5>
 				</section>
 				<section>
 					<h3>David Fetter</h3>
@@ -41,9 +41,491 @@
 						Blog: <a href="https://databasedoings.blogspot.com/">https://databasedoings.blogspot.com</a>
 					</p>
 				</section>
+                <section>
+                    <h1>Past</h1>
+                </section>
+                <section>
+                    <h3>It all started so innocently</h3>
+                </section>
+                <section>
+                    <pre>From: Kevin Grittner <kgrittn(at)ymail(dot)com>
+To: "pgsql-hackers(at)postgresql(dot)org" <pgsql-hackers(at)postgresql(dot)org>
+Subject: counting algorithm for incremental matview maintenance
+Date: 2013-05-14 19:52:06</pre>
+                </section>
+                <section>
+                    <h3>Note date</h3>
+                    Date: <span style="color:red">2013</span>-05-14 19:52:06</pre>
+                </section>
+                <section>
+                    Years pass
+                </section>
+                <section>
+                    Kevin refines the concept through coding and conversing on pgsql-hackers.
+                </section>
+                <section>
+                    Then
+                </section>
+                <section>
+                    <pre style="font-size:18px;">commit 8c48375e5f43ebd832f93c9166d1fe0e639ff806
+Author: Kevin Grittner <kgrittn@postgresql.org>
+Date:   Fri Nov 4 10:49:50 <span style="color:red;">2016</span> -0500
+
+    Implement syntax for transition tables in AFTER triggers.
+
+    This is infrastructure for the complete SQL standard feature.  No
+    support is included at this point for execution nodes or PLs.  The
+    intent is to add that soon.
+
+    As this patch leaves things, standard syntax can create tuplestores
+    to contain old and/or new versions of rows affected by a statement.
+    References to these tuplestores are in the TriggerData structure.
+    C triggers can access the tuplestores directly, so they are usable,
+    but they cannot yet be referenced within a SQL statement.</pre>
+                </section>
+                <section>
+                    Nearly 5 months later...
+                </section>
+                <section>
+                    <pre style="font-size:18px;">commit 18ce3a4ab22d2984f8540ab480979c851dae5338
+Author: Kevin Grittner <kgrittn@postgresql.org>
+Date:   Fri Mar 31 23:17:18 2017 -0500
+
+    Add infrastructure to support EphemeralNamedRelation references.
+
+    A QueryEnvironment concept is added, which allows new types of
+    objects to be passed into queries from parsing on through
+    execution.  At this point, the only thing implemented is a
+    collection of EphemeralNamedRelation objects -- relations which
+    can be referenced by name in queries, but do not exist in the
+    catalogs.  The only type of ENR implemented is NamedTuplestore, but
+    provision is made to add more types fairly easily.</pre>
+                </section>
+
+                <section>
+                    <h1>Present</h1>
+                </section>
+                <section>
+                    <h3>A current example</h3>
+                    <a href="https://github.com/davidfetter/changelog_trigger">changelog_trigger</a>
+                    <aside class="notes">Using transition tables (and a few other features) we can reliably answer</aside>
+                </section>
+				<section>
+                    <h5 align="top">The Eternal Question:</h5>
+                    <h2 align="top">WHAT HAPPEN?</h2>
+                </section>
+				<section style="text-align:left;font-size:20pt">
+                        <span>What was going on with client 187666 during February of last year?</span><br/><br/>
+                        <span class="fragment">What did tables postal, email, and phone look like?</span><br/><br/>
+                        <span class="fragment">Do you remember what we set that setting to last week?</span><br/><br/>
+                        <span class="fragment">...and what it had been before we did?</span><br/><br/>
+                        <span class="fragment">When did we delete that @%^# record?!?</span>
+                </section>
+				<section>
+                    <h5 align="top">Common Answer:</h5>
+                    <h2 align="top" class="fragment">Dunno!</h2>
+                </section>
+				<section>
+                    <h5 align="top">Common Reason:</h5>
+                    <h3 align="top" class="fragment">Um, how?</h3>
+                </section>
+				<section>
+                    <h5 align="top">Another Common Reason:</h5>
+                    <h3 align="top" class="fragment">Too finicky to set up!</h3>
+                </section>
+				<section>
+                    <h5 align="top">Yet Another Common Reason:</h5>
+                    <h3 align="top" class="fragment">Maintenance. Ugh.</h3>
+                </section>
+                <section>
+                    <h3 align="top">What would we like?</h3>
+                    <ul>
+                        <span class="fragment">No manual steps after setup</span><br/>
+                        <span class="fragment">Know who made the change</span><br/>
+                        <span class="fragment">...when they made it</span><br/>
+                        <span class="fragment">...down to the row and column level</span><br/>
+                        <span class="fragment">Hardened against schema changes</span><br/>
+                        <span class="fragment">Easy to query</span><br/>
+                        <span class="fragment">In other words...</span><br/>
+                        <span class="fragment">Magic!</span>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Or is it?</h2>
+                </section>
+                <section>
+                    <img
+                        height="60%"
+                        src="https://www.milwaukeetool.com/-/media/Products/Hand-Tools/Storage/48-22-8010_5.ashx?mw=1032&mh=520&hash=BA8C40D461131D1255131F9AD8524DE3EAEC3B44"
+                        alt="picture of an overflowing toolbox"
+                    >
+                    <aside class="notes">
+                    Let's pull some things out of PostgreSQL's gigantic toolbox
+                    </aside>
+                </section>
+                <section>
+                    <ul>
+                        <li>Triggers</li>
+                        <ul>
+                            <li class="fragment">Data changes per statement (New in 10!)</li>
+                            <li class="fragment">Event</li>
+                        </ul>
+                        <li class="fragment">JSONB</li>
+                        <li class="fragment">Partitioning</li>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Logging Data Structure</h3>
+                    <ul>
+                        <li class="fragment">Who</li>
+                        <li class="fragment">When</li>
+                        <li class="fragment">Where</li>
+                        <li class="fragment">What</li>
+                    </ul>
+                    <aside class="notes">
+                        We might even be able to infer "why."
+                    </aside>
+                </section>
+                <section>
+                    <h3>Who</h3>
+                        "user" TEXT DEFAULT CURRENT_USER
+                </section>
+                <section>
+                    <h3>Where</h3>
+                        <span style="text-align:left" class="fragment">table_schema TEXT NOT NULL<br/></span>
+                        <span style="text-align:left" class="fragment">table_name TEXT NOT NULL</span>
+                </section>
+                <section>
+                    <h3>When</h3>
+                    <span class="fragment">timestamp TIMESTAMP</span><span
+                    class="fragment"> WITH TIME ZONE</span><span class="fragment">!!!</span>
+                    <aside class="notes">Why do we need tstz?</aside>
+                </section>
+                <section>
+                    <h3>What</h3>
+                    <ul>
+                        <li class="fragment">old_row <span class="fragment">(if applicable)</span></li>
+                        <li class="fragment">new_row <span class="fragment">(if applicable)</span></li>
+                        <li class="fragment">serialized as JSONB</li>
+                        <ul>
+                            <li class="fragment">Impervious to DDL</li>
+                            <li class="fragment">Good query tools</li>
+                            <li class="fragment">Index friendly</li>
+                        </ul>
+                    </ul>
+                </section>
+                <section>
+                    <h3>Root (db) table</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                        ```sql
+                        CREATE TABLE IF NOT EXISTS the_log (
+                            "timestamp" timestamp with time zone DEFAULT now() NOT NULL,
+                            "user" text NOT NULL DEFAULT CURRENT_USER,
+                            action text NOT NULL,
+                            table_schema text NOT NULL,
+                            table_name text NOT NULL,
+                            old_row jsonb,
+                            new_row jsonb,
+                            CONSTRAINT the_log_check CHECK (
+                                CASE action
+                                    WHEN 'INSERT' THEN old_row IS NULL
+                                    WHEN 'DELETE' THEN new_row IS NULL
+                                END
+                            )
+                        ) PARTITION BY LIST(table_schema);
+
+                        CREATE INDEX ON the_log("timestamp"); /* PostgreSQL 11 feature */
+                        ```
+                        </textarea>
+                    </section>
+                </section>
+                <section>
+                    <h3>Branch (schema) table</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                        ```sql
+                        CREATE TABLE IF NOT EXISTS public_log PARTITION OF the_log
+                        FOR VALUES IN ('public')
+                        PARTITION BY LIST (table_name);
+                        ```
+                        </textarea>
+                    </section>
+                </section>
+                <section>
+                    <h3>Leaf (Table) table</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                        ```sql
+                        CREATE TABLE IF NOT EXISTS public_foo_log PARTITION OF public_log
+                        FOR VALUES IN ('foo');
+                        ```
+                        </textarea>
+                    </section>
+                </section>
+                <section>
+                    <h3>How do we get stuff in there?</h3>
+                    <span class="fragment">Per-statement triggers<br/></span>
+                    <span class="fragment">INSERT<br/></span>
+                    <span class="fragment">UPDATE<br/></span>
+                    <span class="fragment">DELETE</span>
+                </section>
+                <section>
+                    <h3>INSERT trigger</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            CREATE TRIGGER log_insert_public_foo
+                            AFTER INSERT ON foo
+                            REFERENCING NEW TABLE AS new_table
+                            FOR EACH STATEMENT
+                            EXECUTE PROCEDURE log();
+                            ```
+                        </textarea>
+                    </section>
+                    <aside class="notes">Here's that first transition table!</aside>
+                </section>
+                <section>
+                    <h3>DELETE trigger</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            CREATE TRIGGER log_delete_public_foo
+                            AFTER DELETE ON foo
+                            REFERENCING OLD TABLE AS old_table
+                            FOR EACH STATEMENT
+                            EXECUTE PROCEDURE log();
+                            ```
+                        </textarea>
+                    </section>
+                </section>
+                <section>
+                    <h3>UPDATE trigger</h3>
+                    (slightly wierd-looking)
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            CREATE TRIGGER log_update_public_foo
+                            AFTER UPDATE ON foo
+                            REFERENCING OLD TABLE AS old_table NEW TABLE AS new_table
+                            FOR EACH STATEMENT
+                            EXECUTE PROCEDURE log();
+                            ```
+                        </textarea>
+                    </section>
+                </section>
+                <section>
+                    <h3>INSERT trigger body</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            INSERT INTO the_log (
+                                action, table_schema,    table_name, new_row
+                            )
+                            SELECT
+                                TG_OP,  TG_TABLE_SCHEMA, TG_RELNAME, row_to_json(new_table)::jsonb
+                            FROM
+                                new_table;
+                            ```
+                        </textarea>
+                    </section>
+                </section>
+                <section>
+                    <h3>DELETE trigger body</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            INSERT INTO the_log (
+                                action, table_schema,    table_name, old_row
+                            )
+                            SELECT
+                                TG_OP,  TG_TABLE_SCHEMA, TG_RELNAME, row_to_json(old_table)::jsonb
+                            FROM
+                                old_table;
+                            ```
+                        </textarea>
+                    </section>
+                </section>
+                <section>
+                    <h3>UPDATE trigger body</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            INSERT INTO the_log (
+                                action, table_schema,    table_name, old_row, new_row
+                            )
+                            SELECT
+                                TG_OP,  TG_TABLE_SCHEMA, TG_RELNAME, old_row, new_row
+                            FROM
+                                UNNEST(
+                                    ARRAY(SELECT row_to_json(old_table)::jsonb FROM old_table),
+                                    ARRAY(SELECT row_to_json(new_table)::jsonb FROM new_table)
+                                ) AS t(old_row, new_row)
+                            ```
+                        </textarea>
+                    </section>
+                    <aside class="notes">We're assuming that old_table and
+                        new_table come out in lock step. I think we're safe
+                        assuming that.</aside>
+                </section>
+                <section>
+                    <h3>That was tedious and error-prone</h3>
+                </section>
+                <section>
+                    <h5>What do we do when we see tedious and error-prone?</h5>
+                </section>
+                <section>
+                    <h1>Automate!</h1>
+                </section>
+                <section>
+                    <h3>Event trigger</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            CREATE EVENT TRIGGER add_logger
+                                ON ddl_command_end
+                                WHEN tag IN ('create table')
+                                    EXECUTE PROCEDURE add_logger();
+                            ```
+                        </textarea>
+                    </section>
+                    <aside class="notes">What's add_logger? Glad you asked!</aside>
+                </section>
+                <section>
+                    <h3>Event trigger function</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            CREATE OR REPLACE FUNCTION add_logger()
+                            RETURNS event_trigger
+                            SECURITY DEFINER
+                            LANGUAGE plpgsql
+                            AS $$
+                            DECLARE
+                                r RECORD;
+                            BEGIN
+
+                                SELECT p.*, c.relname as table_name INTO STRICT r
+                                FROM
+                                    pg_catalog.pg_event_trigger_ddl_commands() p
+                            ...
+                            /* Call add_logging_items() somewhere in here */
+                            END;
+                            ```
+                        </textarea>
+                    </section>
+                    <aside class="notes">Hey, wait! We didn't define add_logging_items() yet.  Oh, we did.</aside>
+                </section>
+                <section>
+                    <h3>Function that adds the DDL</h3>
+                    <section data-markdown>
+                        <textarea data-template>
+                            ```sql
+                            CREATE OR REPLACE FUNCTION add_logging_items(
+                                schema_name TEXT,
+                                table_name TEXT
+                            )
+                            RETURNS VOID
+                            SECURITY DEFINER
+                            LANGUAGE plpgsql
+                            AS $$
+                            BEGIN
+                            /* That Tedious Stuff */
+                            END;
+                            $$;
+                            ```
+                        </textarea>
+                    </section>
+                    <aside class="notes">
+                        Add the log table heirarchy using CREATE ... IF NOT EXISTS<br/>
+                        Add the triggers
+                </section>
+                <section style=text-align:left">
+                    <h3 style="text-align:center">TODO</h3>
+                    <ul>
+                        <span class="fragment">Propagate indexes</span>
+                        <span class="fragment">like primary keys.</span>
+                        <br/>
+                        <span class="fragment">Separate TP from analytics</span>
+                        <span class="fragment">with FDWs</span>
+                        <span class="fragment">or something.</span>
+                        <br/>
+                        <span class="fragment">Less code/data on pub</span>
+                        <span class="fragment">with logical decoding.</span>
+                        <br/>
+                        <span class="fragment">Stuff I haven't thought of</span>
+                        <span class="fragment">with your help!</span>
+                        <br/>
+                        <span class="fragment">Please file bug reports!</span>
+                    </ul>
+                    <aside class="notes">The all-important Stuff I Haven't Thought Of</aside>
+                </section>
+                <section>
+                    <h1>Future</h1>
+                </section>
+                <section>
+                    <h3>Materialized View Maintenance</h3>
+                </section>
+                <section>
+                    <h5>"Simple" views (no recursion or aggregation)</h5>
+                    <ul>
+                        <span class="fragment">"Counting algorithm"<br/></span>
+                        <span class="fragment">built atop transition tables</span>
+                    </ul>
+                </section>
+                <section>
+                    <h5>Recursive views</h5>
+                    <ul>
+                        <span class="fragment">DRed</span>
+                        <span class="fragment">(Delete and Rederive)<br/></span>
+                        <span class="fragment">...also built atop transition tables<br/></span>
+                        <span class="fragment">Heavier weight operation :(</span>
+                    </ul>
+                </section>
+                <section>
+                    <h5>Aggregates: The Good</h5>
+                    <ul>
+                        <span class="fragment">SUM<br/></span>
+                        <span class="fragment">COUNT<br/></span>
+                        <span class="fragment">Stored as-is<br/></span>
+                        <span class="fragment">Simple to update from with transition tables<br/></span>
+                        <span class="fragment">Yay!<br/></span>
+                    </ul>
+                </section>
+                <section>
+                    <h5>Aggregates: The Bad</h5>
+                    <ul>
+                        <span class="fragment">AVG<br/></span>
+                        <span class="fragment">STDDEV<br/></span>
+                        <span class="fragment">Stored in a different form<br/></span>
+                        <span class="fragment">Store AVG as SUM and COUNT,</span><span class="fragment"> divide before display<br/></span>
+                        <span class="fragment">Store STDDEV as N, SUM, SUM(X^2),</span><span class="fragment"> do some complex arithmetic before display<br/></span>
+                    </ul>
+                </section>
+                <section>
+                    <h5>Aggregates: The Ugly</h5>
+                    <ul>
+                        <span class="fragment">MEDIAN a.k.a. PERCENTILE_CONT<br/></span>
+                        <span class="fragment">ARRAY_AGG()<br/></span>
+                        <span class="fragment">Stored in a different form <span style="color:red;">that's bulky</span><br/></span>
+                        <span class="fragment">Recompute entirely at every change.<br/></span>
+                        <span class="fragment">...or do something too clever to reduce some of the load.</span>
+                    </ul>
+                </section>
+                <section>
+                    <ul>
+                        <span class="fragment">Questions?<br/></span>
+                        <span class="fragment">Comments?<br/></span>
+                        <span class="fragment">Snowballs?<br/><img
+                            src="http://www.futurenostalgia.org/images/20110303051712_snowballs.jpg"
+                            alt="Snowballs"/></span>
+                    </ul>
+                </section>
+                <section>
+                    <h1>Спасибо!</h1>
+                </section>
 			</div>
 		</div>
-
 		<script src="lib/js/head.min.js"></script>
 		<script src="js/reveal.js"></script>
 
@@ -60,41 +542,42 @@
 				]
 			});
 		</script>
-		<style type="text/css">
-			/* 1. Style header/footer <div> so they are positioned as desired. */
-			#footer-left {
-				position: absolute;
-				bottom: 5%;
-				left: 5%;
-				font-size: 30%;
-			}
-		</style>
+    <style type="text/css">
+        /* 1. Style header/footer <div> so they are positioned as desired. */
+        #footer-left {
+            position: absolute;
+            bottom: 5%;
+            left: 5%;
+            font-size: 50%;
+        }
+    </style>
 
-		<!-- 2. Create hidden header/footer <div> -->
-		<div id="hidden" style="display:none;">
-			<div id="header">
-				<div id="header-left"></div>
-				<div id="header-right"></div>
-				<div id="footer-left">
-					David Fetter<br/>
-					XXX Event Title<br/>
-					XXX February 31, 2018<br/>
-					<a href=mailto:david@fetter.org>david@fetter.org</a></div>
-			</div>
-		</div>
+    <!-- 2. Create hidden header/footer <div> -->
+    <div id="hidden" style="display:none;">
+        <div id="header">
+            <div id="header-left"></div>
+            <div id="header-right"></div>
+            <div id="footer-left">
+                David Fetter<br/>
+                PGConf.RU<br/>
+                February 7, 2018<br/>
+                <a href=mailto:david@fetter.org>david@fetter.org</a></div>
+        </div>
+    </div>
 
-		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-		<script type="text/javascript">
-			// 3. On Reveal.js ready event, copy header/footer <div> into each `.slide-background` <div>
-			var header = $('#header').html();
-			if ( window.location.search.match( /print-pdf/gi ) ) {
-				Reveal.addEventListener( 'ready', function( event ) {
-					$('.slide-background').append(header);
-				});
-			}
-			else {
-				$('div.reveal').append(header);
-		   }
-		</script>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript">
+        // 3. On Reveal.js ready event, copy header/footer <div> into each `.slide-background` <div>
+        var header = $('#header').html();
+        if ( window.location.search.match( /print-pdf/gi ) ) {
+            Reveal.addEventListener( 'ready', function( event ) {
+                $('.slide-background').append(header);
+            });
+        }
+        else {
+            $('div.reveal').append(header);
+       }
+    </script>
+
 	</body>
 </html>
